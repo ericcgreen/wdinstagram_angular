@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="wdinstagram">
+<html data-ng-app="wdinstagram">
   <head>
     <title>Angular</title>
     <link rel="stylesheet" href="style.css" />
@@ -10,18 +10,8 @@
 
     <script src="js/app.js"></script>
   </head>
-  <body ng-controller="wdiCtrl as vm">
+  <body>
     <h2>WDIstagram</h2>
-      <div ng-repeat="insta in vm.instas">
-        <h3> {{insta.author}} </h3>
-        <img ng-src={{insta.photo_url}}>
-        <p> {{insta.body}} </p>
-      </div>
-      <form>
-        <input placeholder="Photo URL" ng-model="vm.newInsta.photo_url">
-        <input placeholder="Author" ng-model="vm.newInsta.author">
-        <input placeholder="Caption" ng-model="vm.newInsta.body">
-        <button type="submit">Add Instagram</button>
-      </form>
+    <main data-ui-view></main>
   </body>
 </html>
