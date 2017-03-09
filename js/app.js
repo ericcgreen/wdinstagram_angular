@@ -1,20 +1,16 @@
 "use strict";
 
-let data = [
-  {photo_url: "https://lh3.googleusercontent.com/aYbdIM1abwyVSUZLDKoE0CDZGRhlkpsaPOg9tNnBktUQYsXflwknnOn2Ge1Yr7rImGk=w300", author: "Eric", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", id: 0},
-  {photo_url: "https://lh3.googleusercontent.com/aYbdIM1abwyVSUZLDKoE0CDZGRhlkpsaPOg9tNnBktUQYsXflwknnOn2Ge1Yr7rImGk=w300", author: "Eva", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", id: 1},
-  {photo_url: "https://lh3.googleusercontent.com/aYbdIM1abwyVSUZLDKoE0CDZGRhlkpsaPOg9tNnBktUQYsXflwknnOn2Ge1Yr7rImGk=w300", author: "Andy", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", id: 2}
-]
-
 angular
-  .module("wdinstagram", ["ui.router"])
+  .module("wdinstagram", ["ui.router", "ngResource"])
   .config(["$stateProvider", RouterFunction])
-  .controller("wdiIndexCtrl", ["$stateParams", wdinstagramIndexController])
-  .controller("wdiNewCtrl", ["$stateParams", wdinstagramNewController])
-  .controller("wdiShowCtrl", ["$stateParams",
+  .factory("InstaFactory", ["$resource", InstaFactoryFunction])
+  .controller("wdiIndexCtrl", ["InstaFactory", wdinstagramIndexController])
+  .controller("wdiNewCtrl", ["InstaFactory", "$state", wdinstagramNewController])
+  .controller("wdiShowCtrl", ["InstaFactory", "$stateParams",
   wdinstagramShowController])
+  .controller("wdiEditCtrl", ["InstaFactory", "$stateParams", "$state", wdinstagramEditController])
 
-function RouterFunction($stateProvider){
+function RouterFunction( $stateProvider ){
   $stateProvider
   .state("wdiIndex", {
     url: "/instas",
@@ -34,20 +30,46 @@ function RouterFunction($stateProvider){
     controller: "wdiShowCtrl",
     controllerAs: "vm"
   })
+  .state("wdiEdit", {
+    url: "/instas/:id/edit",
+    templateUrl: "js/ng-views/edit.html",
+    controller: "wdiEditCtrl",
+    controllerAs: "vm"
+  })
 }
 
-function wdinstagramIndexController(){
-  this.instas = data
+function InstaFactoryFunction( $resource ){
+  return $resource("http://localhost:3000/entries/:id", {}, {  update: { method: "Put" }
+  })
 }
 
-function wdinstagramNewController($stateParams){
+function wdinstagramIndexController( InstaFactory ){
+  this.instas = InstaFactory.query()
+}
+
+function wdinstagramNewController( InstaFactory, $state ){
+  this.insta = new InstaFactory()
   this.create = function(){
-    this.insta.save(function(insta) {
+    this.insta.$save(function(insta) {
       $state.go("wdiShow", {id: insta.id})
     })
   }
 }
 
-function wdinstagramShowController($stateParams){
-  this.insta = data[$stateParams.id]
+function wdinstagramShowController(InstaFactory, $stateParams){
+  this.insta = InstaFactory.get({id: $stateParams.id})
+}
+
+function wdinstagramEditController( InstaFactory, $stateParams, $state ){
+  this.insta = InstaFactory.get({id: $stateParams.id})
+  this.update = function(){
+    this.insta.$update({id: $stateParams.id }, function(insta) {
+      $state.go("wdiShow", {id: insta.id})
+    })
+  }
+  this.destroy = function(){
+    this.insta.$delete({id: $stateParams.id}, function(insta) {
+      $state.go("wdiIndex")
+    })
+  }
 }
