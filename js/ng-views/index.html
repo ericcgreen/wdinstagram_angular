@@ -6,5 +6,7 @@
   <h3> {{insta.author}} </h3>
   <a data-ui-sref="wdiShow({id: insta.id})"><img data-ng-src={{insta.photo_url}}></a>
   <p> {{insta.body}} </p>
-  <a data-ui-sref="wdiEdit({id: insta.id})">Edit</a>
+  <button>
+    <a data-ui-sref="wdiEdit({id: insta.id})">Edit</a>
+  </button>
 </div>
